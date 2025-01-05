@@ -27,7 +27,7 @@
             border-radius: 8px;
         }
         #message {
-            width: calc(100% - 120px);
+            width: calc(100% - 330px);
             padding: 12px;
             border: 1px solid #333;
             border-radius: 5px;
@@ -35,7 +35,7 @@
             color: #ffffff;
             box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
         }
-        #send {
+        #send, .link-button {
             width: 90px;
             padding: 12px;
             border: none;
@@ -46,8 +46,10 @@
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
             transition: background 0.3s, transform 0.3s;
             margin-left: 10px;
+            text-align: center;
+            text-decoration: none;
         }
-        #send:hover {
+        #send:hover, .link-button:hover {
             background: #45a049;
             transform: scale(1.05);
         }
@@ -89,9 +91,10 @@
         <button id="zone2" class="zone-button">加入2区</button>
     </div>
     <div id="chat"></div>
-    <div style="display: flex; width: 80%;">
+    <div style="display: flex; width: 80%; align-items: center;">
         <input type="text" id="message" placeholder="输入消息">
         <button id="send">发送</button>
+        <a href="http://np.ip-ddns.com" target="_blank" class="link-button">NPickaxe11的引导页</a>
     </div>
 
     <script>
@@ -147,21 +150,35 @@
             initializeParse('zone2');
         });
 
-        sendButton.addEventListener('click', () => {
+        const sendMessage = async () => {
             if (!currentZone) {
                 alert('请选择区域');
                 return;
             }
+
             const message = new Parse.Object('Messages');
             message.set('content', messageInput.value);
+
             message.save().then(() => {
                 const messageElement = document.createElement('div');
                 messageElement.textContent = messageInput.value;
                 messageElement.classList.add('message');
+
                 chat.appendChild(messageElement);
                 chat.scrollTop = chat.scrollHeight;
                 messageInput.value = '';
             });
+        }
+
+        sendButton.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                sendMessage();
+                event.preventDefault();  // 阻止默认换行行为
+            } else if (event.key === 'Enter' && event.shiftKey) {
+                messageInput.value += '\n';  // 在文本框中插入换行符
+                event.preventDefault();  // 阻止默认换行行为
+            }
         });
     </script>
 </body>
