@@ -10,17 +10,18 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            background: linear-gradient(135deg, #ece9e6, #ffffff);
+            background: #121212;
             margin: 0;
             padding: 20px;
+            color: #ffffff;
         }
         #chat {
-            border: 1px solid #ccc;
+            border: 1px solid #333;
             padding: 15px;
             height: 300px;
             width: 80%;
             overflow-y: scroll;
-            background: #fff;
+            background: #1e1e1e;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             margin-bottom: 20px;
             border-radius: 8px;
@@ -28,8 +29,10 @@
         #message {
             width: calc(100% - 120px);
             padding: 12px;
-            border: 1px solid #ccc;
+            border: 1px solid #333;
             border-radius: 5px;
+            background: #2c2c2c;
+            color: #ffffff;
             box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
         }
         #send {
@@ -52,12 +55,28 @@
             padding: 12px;
             margin: 10px 0;
             border-radius: 8px;
-            background: #f1f1f1;
+            background: #333;
+            color: #ffffff;
             animation: fadeIn 0.5s ease-in-out;
         }
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
+        }
+        .zone-button {
+            flex: 1;
+            padding: 10px;
+            margin: 0 5px;
+            background: #555;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.3s;
+        }
+        .zone-button:hover {
+            background: #777;
+            transform: scale(1.05);
         }
     </style>
     <!-- 引入Parse SDK -->
@@ -65,6 +84,10 @@
 </head>
 <body>
     <h1>简易聊天室</h1>
+    <div style="display: flex; width: 80%; margin-bottom: 20px;">
+        <button id="zone1" class="zone-button">加入1区</button>
+        <button id="zone2" class="zone-button">加入2区</button>
+    </div>
     <div id="chat"></div>
     <div style="display: flex; width: 80%;">
         <input type="text" id="message" placeholder="输入消息">
@@ -72,29 +95,63 @@
     </div>
 
     <script>
-        // 使用你的Back4App配置初始化Parse
-        Parse.initialize("Z3gpdhF9Bl6DUCOE9y2NCzIBkOWaab7ZRFLFjZts", "7KShmn3scDvwhVLRn96DSjKmS6g8rU5XpFrcSAOF");
-        Parse.serverURL = 'https://parseapi.back4app.com/';
+        let currentZone;
 
         const chat = document.getElementById('chat');
         const messageInput = document.getElementById('message');
         const sendButton = document.getElementById('send');
+        const zone1Button = document.getElementById('zone1');
+        const zone2Button = document.getElementById('zone2');
 
-        // 监听新的消息
-        const query = new Parse.Query('Messages');
-        query.ascending('createdAt');
-        query.find().then(messages => {
-            messages.forEach(message => {
-                const messageElement = document.createElement('div');
-                messageElement.textContent = message.get('content');
-                messageElement.classList.add('message');
-                chat.appendChild(messageElement);
-                chat.scrollTop = chat.scrollHeight;
+        // 配置不同区的应用程序ID和JavaScript密钥
+        const config = {
+            zone1: {
+                appId: "Z3gpdhF9Bl6DUCOE9y2NCzIBkOWaab7ZRFLFjZts",
+                jsKey: "7KShmn3scDvwhVLRn96DSjKmS6g8rU5XpFrcSAOF",
+                serverURL: 'https://parseapi.back4app.com/'
+            },
+            zone2: {
+                appId: "tLqNU9MrY10p9GmEWvErh8t1gvQ8EoeF9gbvjE4o",
+                jsKey: "ebif7gZGyogchJbOLJZS9itIkg0kQYFgDbxgpP0l",
+                serverURL: 'https://parseapi.back4app.com/'
+            }
+        };
+
+        function initializeParse(zone) {
+            Parse.initialize(config[zone].appId, config[zone].jsKey);
+            Parse.serverURL = config[zone].serverURL;
+            currentZone = zone;
+            loadMessages();
+        }
+
+        function loadMessages() {
+            chat.innerHTML = '';
+            const query = new Parse.Query('Messages');
+            query.ascending('createdAt');
+            query.find().then(messages => {
+                messages.forEach(message => {
+                    const messageElement = document.createElement('div');
+                    messageElement.textContent = message.get('content');
+                    messageElement.classList.add('message');
+                    chat.appendChild(messageElement);
+                    chat.scrollTop = chat.scrollHeight;
+                });
             });
+        }
+
+        zone1Button.addEventListener('click', () => {
+            initializeParse('zone1');
         });
 
-        // 发送消息
+        zone2Button.addEventListener('click', () => {
+            initializeParse('zone2');
+        });
+
         sendButton.addEventListener('click', () => {
+            if (!currentZone) {
+                alert('请选择区域');
+                return;
+            }
             const message = new Parse.Object('Messages');
             message.set('content', messageInput.value);
             message.save().then(() => {
