@@ -20,7 +20,7 @@
             padding: 20px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
             text-align: center;
-            width: 300px;
+            width: 600px; /* 调整容器宽度 */
             border-radius: 10px;
         }
         button {
@@ -33,9 +33,18 @@
             color: #fff;
             cursor: pointer;
         }
-        img {
-            width: 250px; /* 调整图片大小 */
+        .images {
+            display: flex;
+            justify-content: space-between;
+        }
+        .images img:first-child {
+            width: 45%; /* 调整图片大小 */
             margin-top: 10px;
+        }
+        .images img:last-child {
+            width: 45%; /* 调整图片大小 */
+            margin-top: 10px;
+            height: 270px; /* 再稍微增加高度 */
         }
     </style>
 </head>
@@ -43,8 +52,10 @@
     <div class="container">
         <h1>捐款</h1>
         <p>感谢您的支持！请扫描以下QR Code进行捐款。</p>
-        <img src="zfb.webp" alt="支付宝二维码">
-        <img src="wx.webp" alt="微信二维码">
+        <div class="images">
+            <img src="zfb.webp" alt="支付宝二维码">
+            <img src="wx.webp" alt="微信二维码">
+        </div>
     </div>
 </body>
 </html>
